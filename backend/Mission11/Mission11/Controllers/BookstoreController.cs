@@ -14,15 +14,25 @@ public class BookstoreController : Controller
         _context = temp;
     }
     [HttpGet("AllBooks")]
-    public IActionResult Get( int pageSize, int pageNum)
+    public IActionResult Get( int pageSize = 10, int pageNum = 1, string sortField = "Title", string sortDirection = "asc")
     {
-        var bookList = _context.Books
+        var bookList = new List<Book>();
+        if (sortDirection == "asc")
+        {
+            bookList =  _context.Books.OrderBy(x => x.Title).ToList();
+        }
+        else
+        {
+            bookList = _context.Books.OrderByDescending(x => x.Title).ToList();
+        }
+        
+        bookList =  bookList
             .Skip((pageNum - 1) * pageSize)
             .Take(pageSize)
             .ToList();
         
         var numberOfBooks = _context.Books.Count();
-
+        
         var returnObject = new
         {
             books = bookList,

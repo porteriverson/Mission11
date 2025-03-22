@@ -7,11 +7,13 @@ function BookList() {
   const [pageNum, setPageNum] = useState<number>(1);
   const [totalPageNum, setTotalPageNum] = useState<number>(0);
   const [totalBooks, setTotalBooks] = useState<number>(0);
+  const [sortField, setSortField] = useState<string>('Title');
+  const [sortDirection, setSortDirection] = useState<string>('asc');
 
   useEffect(() => {
     const fetchProjects = async () => {
       const response = await fetch(
-        `http://localhost:4000/Bookstore/AllBooks?pageSize=${pageSize}&pageNum=${pageNum}`
+        `http://localhost:4000/Bookstore/AllBooks?pageSize=${pageSize}&pageNum=${pageNum}&sortField=${sortField}&sortDirection=${sortDirection}`
       );
       const data = await response.json();
       setBooks(data.books);
@@ -19,7 +21,26 @@ function BookList() {
       setTotalPageNum(Math.ceil(totalBooks / pageSize));
     };
     fetchProjects();
-  }, [pageSize, pageNum]);
+  }, [pageSize, pageNum, sortField, sortDirection]);
+
+  const handleSort = (field: string) => {
+    // If clicking the same field, toggle direction
+    // If clicking a different field, set that field and default to ascending
+    if (field === sortField) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDirection('asc');
+    }
+  };
+
+  // Helper function to show sort indicator
+  const getSortIndicator = (field: string) => {
+    if (field === sortField) {
+      return sortDirection === 'asc' ? ' ↓' : ' ↑';
+    }
+    return '';
+  };
 
   return (
     <>
@@ -27,7 +48,13 @@ function BookList() {
       <table className="table table-bordered table-hover">
         <thead>
           <tr>
-            <th>Title</th>
+            <th
+              onClick={() => {
+                handleSort('Title');
+              }}
+            >
+              Book Title{getSortIndicator('Title')}
+            </th>
             <th>Author</th>
             <th>Publisher</th>
             <th>ISBN</th>
