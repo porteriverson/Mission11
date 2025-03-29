@@ -1,5 +1,8 @@
 import { useEffect, useState } from 'react';
-import { Book } from './types/Book';
+import { Book } from '../types/Book';
+import { useNavigate } from 'react-router-dom';
+import { CartItem } from '../types/CartItem';
+import { useCart } from '../context/CartContext';
 
 function BookList({
   selectedCategories,
@@ -16,6 +19,8 @@ function BookList({
   const [totalBooks, setTotalBooks] = useState<number>(0);
   const [sortField, setSortField] = useState<string>('Title');
   const [sortDirection, setSortDirection] = useState<string>('asc');
+  const navigate = useNavigate();
+  const { addToCart } = useCart();
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -60,11 +65,22 @@ function BookList({
     return '';
   };
 
+  const handleAddBook = (book: Book) => {
+    const newItem: CartItem = {
+      bookId: book.bookId,
+      title: book.title || 'Book Not Found',
+      quantity: 1,
+      price: book.price,
+    };
+    addToCart(newItem);
+    navigate('/cart');
+  };
+
   return (
     <>
       <div className="container">
         <table className="table table-bordered table-hover">
-          <thead>
+          <thead className="table-dark">
             <tr>
               <th
                 onClick={() => {
@@ -78,8 +94,9 @@ function BookList({
               <th>ISBN</th>
               <th>Classification</th>
               <th>Category</th>
-              <th>Number of Pages</th>
+              <th>Pages</th>
               <th>Price</th>
+              <th>Cart</th>
             </tr>
           </thead>
           <tbody>
@@ -93,6 +110,14 @@ function BookList({
                 <td>{b.category}</td>
                 <td>{b.pageCount}</td>
                 <td>${b.price}</td>
+                <td>
+                  <button
+                    className="btn btn-success"
+                    onClick={() => handleAddBook(b)}
+                  >
+                    Add
+                  </button>
+                </td>
               </tr>
             ))}
           </tbody>
