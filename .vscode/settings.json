@@ -1,0 +1,4 @@
+{
+  "appService.defaultWebAppToDeploy": "undefined/subscriptions/0265c0da-851f-41c4-ba30-28c5a4f109a6/resourceGroups/appsvc_windows_eastus/providers/Microsoft.Web/sites/Mission13-PorterBackend",
+  "appService.deploySubpath": "backend/Mission11/Mission11/publish"
+}

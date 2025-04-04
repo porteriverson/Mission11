@@ -3,6 +3,8 @@ import { Book } from '../types/Book';
 import { useNavigate } from 'react-router-dom';
 import { CartItem } from '../types/CartItem';
 import { useCart } from '../context/CartContext';
+import { fetchAll } from '../api/BookAPI';
+import Pagination from './Pagination';
 
 function BookList({
   selectedCategories,
@@ -19,24 +21,32 @@ function BookList({
   const [totalBooks, setTotalBooks] = useState<number>(0);
   const [sortField, setSortField] = useState<string>('Title');
   const [sortDirection, setSortDirection] = useState<string>('asc');
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const { addToCart } = useCart();
 
   useEffect(() => {
-    const fetchProjects = async () => {
-      const categoryQuery = selectedCategories.length
-        ? `&bookCat=${encodeURIComponent(selectedCategories.join(','))}`
-        : '';
-
-      const response = await fetch(
-        `https://localhost:5000/Bookstore/AllBooks?pageSize=${pageSize}&pageNum=${pageNum}&sortField=${sortField}&sortDirection=${sortDirection}${categoryQuery}`
-      );
-      const data = await response.json();
-      setBooks(data.books);
-      setTotalBooks(data.numBooks);
-      setTotalPageNum(Math.ceil(totalBooks / pageSize));
+    const loadProject = async () => {
+      try {
+        setLoading(true);
+        const data = await fetchAll(
+          pageSize,
+          pageNum,
+          sortField,
+          sortDirection,
+          selectedCategories
+        );
+        setBooks(data.books);
+        setTotalBooks(data.numBooks);
+        setTotalPageNum(Math.ceil(totalBooks / pageSize));
+      } catch (error) {
+        setError((error as Error).message);
+      } finally {
+        setLoading(false);
+      }
     };
-    fetchProjects();
+    loadProject();
   }, [
     pageSize,
     pageNum,
@@ -45,6 +55,9 @@ function BookList({
     selectedCategories,
     totalBooks,
   ]);
+
+  if (loading) return <p>Loading projects... </p>;
+  if (error) return <p className="text-red-500">Error: {error}</p>;
 
   const handleSort = (field: string) => {
     // If clicking the same field, toggle direction
@@ -123,49 +136,16 @@ function BookList({
           </tbody>
         </table>
         <br />
-        <button
-          className="btn btn-info"
-          disabled={pageNum === 1}
-          onClick={() => setPageNum(pageNum - 1)}
-        >
-          Previous
-        </button>
-
-        {[...Array(totalPageNum)].map((_, i) => (
-          <button
-            disabled={pageNum === i + 1}
-            className="btn"
-            key={i + 1}
-            onClick={() => setPageNum(i + 1)}
-          >
-            {i + 1}
-          </button>
-        ))}
-
-        <button
-          className="btn btn-info"
-          disabled={pageNum === totalPageNum}
-          onClick={() => setPageNum(pageNum + 1)}
-        >
-          Next
-        </button>
-        <br />
-        <br />
-        <label>
-          Number of Rows per page
-          <select
-            value={pageSize}
-            onChange={(p) => {
-              setPageSize(Number(p.target.value));
-              setPageNum(1);
-            }}
-          >
-            <option value="5">5</option>
-            <option value="10">10</option>
-            <option value="15">15</option>
-            <option value="20">20</option>
-          </select>
-        </label>
+        <Pagination
+          currentPage={pageNum}
+          totalPages={totalPageNum}
+          pageSize={pageSize}
+          onPageChange={setPageNum}
+          onPageSizeChange={(newSize) => {
+            setPageSize(newSize);
+            setPageNum(1);
+          }}
+        />
       </div>
     </>
   );

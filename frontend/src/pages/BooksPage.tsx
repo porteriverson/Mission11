@@ -1,13 +1,20 @@
 import BookList from '../components/BookList';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import CategoryFilter from '../components/CategoryFilter';
-import { useState } from 'react';
 import Banner from '../components/Banner';
 import CartIcon from '../components/CartIcon';
 
-function BooksPage() {
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [pageNum, setPageNum] = useState<number>(1);
+function BooksPage({
+  selectedCategories,
+  pageNum,
+  setPageNum,
+  setSelectedCategories,
+}: {
+  selectedCategories: string[];
+  pageNum: number;
+  setPageNum: (pageNum: number) => void;
+  setSelectedCategories: (selectedCategories: string[]) => void;
+}) {
   return (
     <>
       <div className="container">
