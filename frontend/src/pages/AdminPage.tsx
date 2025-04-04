@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { deleteBook, fetchAll } from '../api/BookAPI';
 import { Book } from '../types/Book';
 import Pagination from '../components/Pagination';
@@ -19,13 +18,12 @@ function AdminPage({
   const [pageSize, setPageSize] = useState<number>(5);
   const [totalPageNum, setTotalPageNum] = useState<number>(0);
   const [totalBooks, setTotalBooks] = useState<number>(0);
-  const [sortField, setSortField] = useState<string>('Title');
-  const [sortDirection, setSortDirection] = useState<string>('asc');
+  const [sortField] = useState<string>('Title');
+  const [sortDirection] = useState<string>('asc');
   const [error, setError] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(true);
   const [editingBook, setEditingBook] = useState<Book | null>(null);
-  const navigate = useNavigate();
 
   useEffect(() => {
     const loadProject = async () => {
@@ -66,7 +64,7 @@ function AdminPage({
     try {
       await deleteBook(bookId);
       setBooks(books.filter((b) => b.bookId != bookId));
-    } catch (error) {
+    } catch {
       alert('failed to delete this book. please try again.');
     }
   };
